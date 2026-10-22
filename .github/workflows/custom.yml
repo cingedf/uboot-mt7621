@@ -76,7 +76,9 @@ on:
 jobs:
   build:
     name: Build MT7621 u-boot
-    runs-on: ubuntu-latest
+    # Pin 22.04: ubuntu-latest (24.04+) breaks Python 2.7 (C23 bool keywords)
+    # and no longer ships python2 packages needed by U-Boot 2018.09 pylibfdt.
+    runs-on: ubuntu-22.04
     strategy:
        fail-fast: False
 
@@ -89,17 +91,8 @@ jobs:
       - name: Install essential packages
         run: |
           sudo apt-get update
-          sudo apt-get install -y swig build-essential
-          echo 'Install Python 2.7 for pylibfdt (U-Boot host tools)'
-          wget -q https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tar.xz
-          tar -xJf Python-2.7.18.tar.xz
-          cd Python-2.7.18
-          ./configure --prefix=/usr/local
-          make -j"$(nproc)"
-          sudo make install
-          # Source install puts binaries under /usr/local/bin, not /usr/bin.
-          sudo ln -sfn /usr/local/bin/python2.7 /usr/bin/python
-          sudo ln -sfn /usr/local/bin/python2.7 /usr/bin/python2
+          sudo apt-get install -y swig python2 python2-dev
+          sudo ln -sfn "$(command -v python2)" /usr/bin/python
           python --version
           which python
 
