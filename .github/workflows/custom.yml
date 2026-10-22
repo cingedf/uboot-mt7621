@@ -89,14 +89,19 @@ jobs:
       - name: Install essential packages
         run: |
           sudo apt-get update
-          sudo apt-get install swig
-          echo 'switch to python2 as default'
-          sudo rm /usr/bin/python
-          wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tar.xz
+          sudo apt-get install -y swig build-essential
+          echo 'Install Python 2.7 for pylibfdt (U-Boot host tools)'
+          wget -q https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tar.xz
           tar -xJf Python-2.7.18.tar.xz
           cd Python-2.7.18
-          ./configure && sudo make && sudo make install
-          sudo ln -s /usr/bin/python2 /usr/bin/python
+          ./configure --prefix=/usr/local
+          make -j"$(nproc)"
+          sudo make install
+          # Source install puts binaries under /usr/local/bin, not /usr/bin.
+          sudo ln -sfn /usr/local/bin/python2.7 /usr/bin/python
+          sudo ln -sfn /usr/local/bin/python2.7 /usr/bin/python2
+          python --version
+          which python
 
       - name: Download OpenWrt toolchain
         run: |
